@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>💕 Uma pergunta especial...</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: #fff0f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* corações flutuantes */
+.hf {
+  position: fixed;
+  bottom: -50px;
+  pointer-events: none;
+  z-index: 0;
+  color: #e75480;
+  animation: sobe linear infinite;
+}
+@keyframes sobe {
+  0%   { bottom: -50px; opacity: 0.3; }
+  80%  { opacity: 0.2; }
+  100% { bottom: 110vh; opacity: 0; }
+}
+
+/* card */
+#card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 2.5rem 2rem 2rem;
+  text-align: center;
+  width: 88vw;
+  max-width: 400px;
+  box-shadow: 0 6px 32px rgba(215,80,120,0.18);
+  position: relative;
+  z-index: 2;
+}
+
+.emoji { font-size: 58px; display: block; margin-bottom: 1rem; }
+
+.pergunta {
+  font-size: 22px;
+  font-weight: 700;
+  color: #c2185b;
+  margin-bottom: 2rem;
+  line-height: 1.4;
+}
+
+#botoes {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  min-height: 52px;
+}
+
+.btn {
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  font-family: inherit;
+}
+
+#btnSim {
+  background: #e91e8c;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(233,30,140,0.4);
+  position: relative;
+  z-index: 2;
+}
+
+#btnNao {
+  background: #fff;
+  color: #c2185b;
+  border: 2.5px solid #e91e8c !important;
+  box-shadow: 0 4px 14px rgba(233,30,140,0.2);
+  position: relative;
+  z-index: 3;
+}
+
+/* quando fugindo vira fixed */
+#btnNao.fixed {
+  position: fixed;
+  z-index: 9999;
+}
+
+/* tela de sucesso */
+#ok {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  z-index: 2;
+  animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes popIn {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.coracao { font-size: 80px; }
+.msg1 { font-size: 24px; font-weight: 700; color: #c2185b; }
+.msg2 { font-size: 17px; color: #e91e8c; line-height: 1.6; }
+.extras { font-size: 40px; }
+</style>
+</head>
+<body>
+
+<div id="card">
+  <span class="emoji">🐱</span>
+  <p class="pergunta">Quer namorar comigo? 💕</p>
+  <div id="botoes">
+    <button class="btn" id="btnSim">Sim ❤️</button>
+    <button class="btn" id="btnNao">Não 🙅</button>
+  </div>
+</div>
+
+<div id="ok">
+  <div class="coracao">💖</div>
+  <p class="msg1">Eu te amo muito minha gatinha!</p>
+  <p class="msg2">Você é o amor da minha vida 🥰</p>
+  <div class="extras">💑✨🌹</div>
+</div>
+
+<script>
+(function() {
+  /* corações flutuantes */
+  var sym = ['♥','❤','💕','💗','💓','💞','🌸'];
+  for (var i = 0; i < 16; i++) {
+    var h = document.createElement('span');
+    h.className = 'hf';
+    h.textContent = sym[i % sym.length];
+    h.style.left = (Math.random() * 95) + '%';
+    h.style.fontSize = (13 + Math.random() * 18) + 'px';
+    h.style.animationDuration = (5 + Math.random() * 8) + 's';
+    h.style.animationDelay = (Math.random() * 9) + 's';
+    document.body.appendChild(h);
+  }
+
+  var card    = document.getElementById('card');
+  var btnSim  = document.getElementById('btnSim');
+  var btnNao  = document.getElementById('btnNao');
+  var ok      = document.getElementById('ok');
+  var jaFixed = false;
+
+  function fugir() {
+    /* na primeira vez converte para fixed na posição atual */
+    if (!jaFixed) {
+      var r = btnNao.getBoundingClientRect();
+      btnNao.classList.add('fixed');
+      btnNao.style.width  = r.width  + 'px';
+      btnNao.style.height = r.height + 'px';
+      btnNao.style.left   = r.left   + 'px';
+      btnNao.style.top    = r.top    + 'px';
+      jaFixed = true;
+    }
+
+    var vw = window.innerWidth  || 360;
+    var vh = window.innerHeight || 640;
+    var bw = btnNao.offsetWidth  || 100;
+    var bh = btnNao.offsetHeight || 50;
+    var sr = btnSim.getBoundingClientRect();
+    var mg = 30;
+
+    var x, y, t = 0;
+    do {
+      x = 8 + Math.random() * (vw - bw - 16);
+      y = 8 + Math.random() * (vh - bh - 16);
+      t++;
+      var colide =
+        x < sr.right  + mg && x + bw > sr.left   - mg &&
+        y < sr.bottom + mg && y + bh > sr.top     - mg;
+      if (!colide) break;
+    } while (t < 60);
+
+    btnNao.style.left = x + 'px';
+    btnNao.style.top  = y + 'px';
+  }
+
+  function clicarSim() {
+    card.style.display   = 'none';
+    btnNao.style.display = 'none';
+    ok.style.display     = 'flex';
+  }
+
+  /* Sim */
+  btnSim.addEventListener('click',      clicarSim);
+  btnSim.addEventListener('touchstart', function(e){ e.preventDefault(); clicarSim(); }, { passive: false });
+
+  /* Não — foge no clique, toque e mouse */
+  btnNao.addEventListener('click',      function(e){ e.preventDefault(); fugir(); });
+  btnNao.addEventListener('touchstart', function(e){ e.preventDefault(); fugir(); }, { passive: false });
+  btnNao.addEventListener('mouseenter', fugir);
+
+})();
+</script>
+</body>
+</html>
